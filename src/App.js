@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import wordList from './wordList';
+import { getRandomWordsEfficient } from './wordListUtils';
 
 function App() {
   const [password, setPassword] = useState('');
@@ -30,18 +30,19 @@ function App() {
   }, [password]);
 
   // Function to generate a three-word passphrase
-  const generatePassword = () => {
-    const selectedWords = [];
-    
-    // Select 3 random words from the word list
-    for (let i = 0; i < 3; i++) {
-      const randomIndex = Math.floor(Math.random() * wordList.length);
-      selectedWords.push(wordList[randomIndex].toLowerCase());
+  const generatePassword = async () => {
+    try {
+      // Get 3 random words from the word list file
+      const selectedWords = await getRandomWordsEfficient(3);
+      
+      // Join with spaces
+      const newPassword = selectedWords.join(' ');
+      setPassword(newPassword);
+    } catch (error) {
+      console.error('Error generating password:', error);
+      // Fallback to a default password if there's an error
+      setPassword('secure password generator');
     }
-    
-    // Join with spaces
-    const newPassword = selectedWords.join(' ');
-    setPassword(newPassword);
   };
 
   // Function to copy password to clipboard
