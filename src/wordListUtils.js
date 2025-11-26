@@ -91,3 +91,76 @@ export const getRandomWordsEfficient = async (count = 3) => {
     return ['secure', 'password', 'generator'].slice(0, count);
   }
 };
+
+/**
+ * Generates a passphrase within specified character length constraints
+ * @param {number} minLength - Minimum total character length (including spaces)
+ * @param {number} maxLength - Maximum total character length (including spaces)
+ * @param {number} maxAttempts - Maximum number of attempts before giving up
+ * @returns {Promise<{words: string[], password: string, success: boolean}>} Result object
+ */
+export const getRandomWordsWithinLength = async (minLength = 16, maxLength = 32, maxAttempts = 100) => {
+  try {
+    // Fetch the entire file once
+    const response = await fetch('/wordlist.txt');
+    if (!response.ok) {
+      throw new Error('Failed to fetch word list');
+    }
+    
+    const text = await response.text();
+    const allWords = text.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length > 0);
+    
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const words = [];
+      const usedIndices = new Set();
+      
+      // Start with 3 words and adjust as needed
+      let targetWordCount = 3;
+      
+      // Generate unique random words
+      while (words.length < targetWordCount && usedIndices.size < allWords.length) {
+        const randomIndex = Math.floor(Math.random() * allWords.length);
+        
+        if (!usedIndices.has(randomIndex)) {
+          usedIndices.add(randomIndex);
+          const word = allWords[randomIndex];
+          if (word) {
+            words.push(word);
+          }
+        }
+      }
+      
+      // Calculate password length (words joined by spaces)
+      const password = words.join(' ');
+      const passwordLength = password.length;
+      
+      // Check if within constraints
+      if (passwordLength >= minLength && passwordLength <= maxLength) {
+        return { words, password, success: true };
+      }
+      
+      // Adjust word count for next attempt based on current length
+      if (passwordLength < minLength) {
+        targetWordCount = Math.min(targetWordCount + 1, 6); // Try more words
+      } else if (passwordLength > maxLength) {
+        targetWordCount = Math.max(targetWordCount - 1, 2); // Try fewer words
+      }
+    }
+    
+    // If we couldn't find a valid combination, return the last attempt with success: false
+    const fallbackWords = await getRandomWordsEfficient(3);
+    return {
+      words: fallbackWords,
+      password: fallbackWords.join(' '),
+      success: false
+    };
+  } catch (error) {
+    console.error('Error generating password within length constraints:', error);
+    const fallbackWords = ['secure', 'password', 'generator'];
+    return {
+      words: fallbackWords,
+      password: fallbackWords.join(' '),
+      success: false
+    };
+  }
+};

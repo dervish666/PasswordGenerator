@@ -9,35 +9,55 @@ import {
   IconButton,
   Snackbar,
   Alert,
-  LinearProgress
+  LinearProgress,
+  Slider
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { getRandomWordsEfficient } from './wordListUtils';
+import { getRandomWordsWithinLength } from './wordListUtils';
 
 function App() {
   const [password, setPassword] = useState('');
   const [copied, setCopied] = useState(false);
   const [charCount, setCharCount] = useState(0);
-  const [meetsMinLength, setMeetsMinLength] = useState(false);
-  const MIN_LENGTH = 16;
+  const [meetsLengthRequirements, setMeetsLengthRequirements] = useState(false);
+  const [minLength, setMinLength] = useState(16);
+  const [maxLength, setMaxLength] = useState(32);
 
   // Update character count when password changes
   useEffect(() => {
     const count = password.length;
     setCharCount(count);
-    setMeetsMinLength(count >= MIN_LENGTH);
-  }, [password]);
+    setMeetsLengthRequirements(count >= minLength && count <= maxLength);
+  }, [password, minLength, maxLength]);
 
-  // Function to generate a three-word passphrase
+  // Handle min length slider change
+  const handleMinLengthChange = (event, newValue) => {
+    // Ensure min doesn't exceed max
+    if (newValue <= maxLength) {
+      setMinLength(newValue);
+    }
+  };
+
+  // Handle max length slider change
+  const handleMaxLengthChange = (event, newValue) => {
+    // Ensure max doesn't go below min
+    if (newValue >= minLength) {
+      setMaxLength(newValue);
+    }
+  };
+
+  // Function to generate a passphrase within length constraints
   const generatePassword = async () => {
     try {
-      // Get 3 random words from the word list file
-      const selectedWords = await getRandomWordsEfficient(3);
+      // Get random words that form a password within the specified length range
+      const result = await getRandomWordsWithinLength(minLength, maxLength);
       
-      // Join with spaces
-      const newPassword = selectedWords.join(' ');
-      setPassword(newPassword);
+      setPassword(result.password);
+      
+      if (!result.success) {
+        console.warn('Could not generate password within exact constraints, using best effort');
+      }
     } catch (error) {
       console.error('Error generating password:', error);
       // Fallback to a default password if there's an error
@@ -76,6 +96,34 @@ function App() {
             Generate a secure three-word passphrase with the click of a button.
           </Typography>
           
+          {/* Length Range Sliders */}
+          <Box sx={{ mt: 3, mb: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Minimum Characters: {minLength}
+            </Typography>
+            <Slider
+              value={minLength}
+              onChange={handleMinLengthChange}
+              min={8}
+              max={64}
+              step={1}
+              valueLabelDisplay="auto"
+              sx={{ mb: 2 }}
+            />
+            
+            <Typography variant="subtitle2" gutterBottom>
+              Maximum Characters: {maxLength}
+            </Typography>
+            <Slider
+              value={maxLength}
+              onChange={handleMaxLengthChange}
+              min={8}
+              max={64}
+              step={1}
+              valueLabelDisplay="auto"
+            />
+          </Box>
+          
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <Button 
               variant="contained" 
@@ -112,7 +160,7 @@ function App() {
                 </IconButton>
               </Box>
               
-              {/* Character count and minimum length indicator */}
+              {/* Character count and length range indicator */}
               <Box sx={{ mt: 2, mb: 1 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                   <Typography variant="body2">
@@ -121,17 +169,21 @@ function App() {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: meetsMinLength ? 'success.main' : 'error.main',
+                      color: meetsLengthRequirements ? 'success.main' : 'error.main',
                       fontWeight: 'medium'
                     }}
                   >
-                    {meetsMinLength ? 'Meets minimum length' : `Minimum ${MIN_LENGTH} characters required`}
+                    {meetsLengthRequirements
+                      ? 'Meets length requirements'
+                      : charCount < minLength
+                        ? `Minimum ${minLength} characters required`
+                        : `Maximum ${maxLength} characters exceeded`}
                   </Typography>
                 </Box>
                 <LinearProgress
                   variant="determinate"
-                  value={Math.min((charCount / MIN_LENGTH) * 100, 100)}
-                  color={meetsMinLength ? "success" : "primary"}
+                  value={Math.min((charCount / minLength) * 100, 100)}
+                  color={meetsLengthRequirements ? "success" : charCount > maxLength ? "error" : "primary"}
                   sx={{ height: 8, borderRadius: 4 }}
                 />
               </Box>
