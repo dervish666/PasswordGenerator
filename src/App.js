@@ -93,7 +93,7 @@ function App() {
         
         <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
           <Typography variant="body1" gutterBottom>
-            Generate a secure three-word passphrase with the click of a button.
+            Generate a secure multi-word passphrase with the click of a button.
           </Typography>
           
           {/* Length Range Sliders */}

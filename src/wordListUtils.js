@@ -110,12 +110,12 @@ export const getRandomWordsWithinLength = async (minLength = 16, maxLength = 32,
     const text = await response.text();
     const allWords = text.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length > 0);
     
+    // Start with 3 words and adjust as needed
+    let targetWordCount = 3;
+    
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const words = [];
       const usedIndices = new Set();
-      
-      // Start with 3 words and adjust as needed
-      let targetWordCount = 3;
       
       // Generate unique random words
       while (words.length < targetWordCount && usedIndices.size < allWords.length) {
