@@ -1,93 +1,173 @@
 // Utility functions for working with the word list text file
 
-const TOTAL_WORDS = 3815; // Total number of words in wordlist.txt
+// In-memory cache for the wordlist to avoid repeated HTTP fetches
+let cachedWordList = null;
 
 /**
- * Fetches a random word from the wordlist.txt file by reading a specific line
- * @returns {Promise<string>} A random word from the list
+ * Returns a cryptographically secure random integer in [0, max)
+ * Uses crypto.getRandomValues() instead of Math.random() for security.
+ * @param {number} max - Exclusive upper bound
+ * @returns {number} Random integer
  */
-export const getRandomWord = async () => {
-  try {
-    // Generate a random line number (1-based indexing)
-    const randomLineNumber = Math.floor(Math.random() * TOTAL_WORDS) + 1;
-    
-    // Fetch the entire file
-    const response = await fetch('/wordlist.txt');
-    if (!response.ok) {
-      throw new Error('Failed to fetch word list');
-    }
-    
-    const text = await response.text();
-    const lines = text.split('\n');
-    
-    // Get the word at the random line (convert to 0-based indexing)
-    const word = lines[randomLineNumber - 1]?.trim();
-    
-    if (!word) {
-      throw new Error('Invalid word retrieved');
-    }
-    
-    return word.toLowerCase();
-  } catch (error) {
-    console.error('Error fetching random word:', error);
-    // Fallback to a default word if there's an error
-    return 'password';
+const secureRandomInt = (max) => {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  // Use modulo with rejection sampling to avoid bias
+  // For our wordlist sizes (< 10000), the bias from simple modulo on a 32-bit
+  // range is negligible (< 0.0001%), but we do it correctly anyway.
+  const limit = Math.floor(0xFFFFFFFF / max) * max;
+  let value = array[0];
+  while (value >= limit) {
+    window.crypto.getRandomValues(array);
+    value = array[0];
   }
+  return value % max;
 };
 
 /**
- * Generates multiple random words from the word list
- * @param {number} count - Number of words to generate
- * @returns {Promise<string[]>} Array of random words
+ * Fetches and caches the wordlist. Deduplicates and normalises entries.
+ * @returns {Promise<string[]>} Array of unique, lowercase words
  */
-export const getRandomWords = async (count = 3) => {
-  const words = [];
-  
-  // Generate multiple random words
-  for (let i = 0; i < count; i++) {
-    const word = await getRandomWord();
-    words.push(word);
+const getWordList = async () => {
+  if (cachedWordList) {
+    return cachedWordList;
   }
-  
+
+  const response = await fetch('/wordlist.txt');
+  if (!response.ok) {
+    throw new Error(`Failed to fetch word list: ${response.status}`);
+  }
+
+  const text = await response.text();
+  const seen = new Set();
+  const words = [];
+
+  for (const raw of text.split('\n')) {
+    const word = raw.trim().toLowerCase();
+    // Skip empty lines, non-alphabetic entries, and duplicates
+    if (word.length > 0 && /^[a-z]+$/.test(word) && !seen.has(word)) {
+      seen.add(word);
+      words.push(word);
+    }
+  }
+
+  if (words.length === 0) {
+    throw new Error('Word list is empty after filtering');
+  }
+
+  cachedWordList = words;
   return words;
 };
 
 /**
- * More efficient version that fetches the file once and selects multiple random lines
- * @param {number} count - Number of words to generate
- * @returns {Promise<string[]>} Array of random words
+ * Clears the cached wordlist (useful for testing)
  */
-export const getRandomWordsEfficient = async (count = 3) => {
-  try {
-    // Fetch the entire file once
-    const response = await fetch('/wordlist.txt');
-    if (!response.ok) {
-      throw new Error('Failed to fetch word list');
+export const clearWordListCache = () => {
+  cachedWordList = null;
+};
+
+/**
+ * Fetches a single random word from the wordlist
+ * @returns {Promise<string>} A random word from the list
+ */
+export const getRandomWord = async () => {
+  const words = await getWordList();
+  return words[secureRandomInt(words.length)];
+};
+
+/**
+ * Generates multiple unique random words from the word list.
+ * Fetches the file once and selects from it.
+ * @param {number} count - Number of words to generate
+ * @returns {Promise<string[]>} Array of unique random words
+ */
+export const getRandomWords = async (count = 3) => {
+  const allWords = await getWordList();
+
+  if (count > allWords.length) {
+    throw new Error(`Requested ${count} words but only ${allWords.length} available`);
+  }
+
+  // Fisher-Yates partial shuffle for unbiased selection
+  const indices = Array.from({ length: allWords.length }, (_, i) => i);
+  for (let i = 0; i < count; i++) {
+    const j = i + secureRandomInt(indices.length - i);
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  return indices.slice(0, count).map(i => allWords[i]);
+};
+
+/**
+ * Generates a passphrase within specified character length constraints.
+ *
+ * Strategy: tries different word counts (2-6), picking random words each
+ * attempt, and returns the first combination that fits within the
+ * [minLength, maxLength] range (inclusive, counting spaces).
+ *
+ * @param {number} minLength - Minimum total character length (including spaces)
+ * @param {number} maxLength - Maximum total character length (including spaces)
+ * @param {number} maxAttempts - Maximum number of attempts before giving up
+ * @returns {Promise<{words: string[], password: string, success: boolean}>} Result object
+ */
+export const getRandomWordsWithinLength = async (minLength = 16, maxLength = 32, maxAttempts = 100) => {
+  if (minLength > maxLength) {
+    return { words: [], password: '', success: false };
+  }
+
+  const allWords = await getWordList();
+
+  // Pre-sort words by length for smarter selection when we need to adjust
+  const shortestWordLen = Math.min(...allWords.map(w => w.length));
+  const longestWordLen = Math.max(...allWords.map(w => w.length));
+
+  // Estimate a reasonable starting word count:
+  // Average word length plus a space separator
+  const avgWordLen = allWords.reduce((sum, w) => sum + w.length, 0) / allWords.length;
+  const targetLen = (minLength + maxLength) / 2;
+  let targetWordCount = Math.max(2, Math.min(6, Math.round(targetLen / (avgWordLen + 1))));
+
+  let bestResult = null;
+  let bestDistance = Infinity;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Clamp word count to feasible range
+    const wordCount = Math.max(2, Math.min(6, targetWordCount));
+
+    if (wordCount > allWords.length) break;
+
+    const words = await getRandomWords(wordCount);
+    const password = words.join(' ');
+    const len = password.length;
+
+    if (len >= minLength && len <= maxLength) {
+      return { words, password, success: true };
     }
-    
-    const text = await response.text();
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    
-    const words = [];
-    const usedIndices = new Set();
-    
-    // Generate unique random words
-    while (words.length < count && usedIndices.size < lines.length) {
-      const randomIndex = Math.floor(Math.random() * lines.length);
-      
-      if (!usedIndices.has(randomIndex)) {
-        usedIndices.add(randomIndex);
-        const word = lines[randomIndex];
-        if (word) {
-          words.push(word.toLowerCase());
-        }
+
+    // Track the closest result as fallback
+    const distance = len < minLength ? minLength - len : len - maxLength;
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestResult = { words, password, success: false };
+    }
+
+    // Adjust word count for next attempt
+    if (len < minLength) {
+      // Check if adding a word is feasible
+      const minPossibleWithMore = wordCount * (shortestWordLen + 1) + shortestWordLen;
+      if (minPossibleWithMore <= maxLength) {
+        targetWordCount = wordCount + 1;
+      }
+      // Otherwise keep same count and hope for longer words
+    } else {
+      // Too long - check if fewer words could work
+      const maxPossibleWithFewer = (wordCount - 2) * (longestWordLen + 1) + longestWordLen;
+      if (maxPossibleWithFewer >= minLength || wordCount > 2) {
+        targetWordCount = wordCount - 1;
       }
     }
-    
-    return words;
-  } catch (error) {
-    console.error('Error fetching random words:', error);
-    // Fallback to default words if there's an error
-    return ['secure', 'password', 'generator'].slice(0, count);
   }
+
+  // Return the closest result we found
+  return bestResult || { words: [], password: '', success: false };
 };
