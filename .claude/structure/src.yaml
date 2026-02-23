@@ -1,0 +1,46 @@
+# src/ structure detail
+module: password-generator
+directory: src/
+description: React application source files
+
+files:
+  index.js:
+    description: App entry point - creates MUI theme and renders App
+    exports: []
+    imports:
+      - from: ./App
+        items: [App]
+
+  App.js:
+    description: Main UI component - passphrase generation, clipboard copy, length check
+    exports:
+      - name: App
+        kind: function
+        returns: JSX.Element
+        description: Single-component app with password state, copy-to-clipboard, and 16-char minimum length indicator
+    imports:
+      - from: ./wordListUtils
+        items: [getRandomWordsEfficient]
+
+  wordListUtils.js:
+    description: Utilities for fetching random words from public/wordlist.txt (3815 words)
+    exports:
+      - name: getRandomWord
+        kind: function
+        params: []
+        returns: Promise<string>
+        description: Fetches wordlist.txt and returns one random lowercase word
+      - name: getRandomWords
+        kind: function
+        params: [{name: count, type: number, default: 3}]
+        returns: Promise<string[]>
+        description: Calls getRandomWord N times sequentially (less efficient)
+      - name: getRandomWordsEfficient
+        kind: function
+        params: [{name: count, type: number, default: 3}]
+        returns: Promise<string[]>
+        description: Fetches wordlist once, picks N unique random lowercase words. Used by App.
+
+  index.css:
+    description: Base font styles for body and code elements
+    exports: []
