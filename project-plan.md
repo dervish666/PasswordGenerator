@@ -1,5 +1,7 @@
 # Password Generator Web Application Plan
 
+> **Note:** This was the original planning document. The implementation has since evolved — the app now uses `crypto.getRandomValues()` instead of `Math.random()`, supports configurable min/max character length constraints, and uses the EFF Large Diceware wordlist (7772 words). See `CLAUDE.md` for current architecture.
+
 This document outlines the plan for creating a lightweight, React-based password generator with Material UI that can be deployed via Docker to an Unraid server.
 
 ## Architecture Overview

@@ -11,20 +11,22 @@ After adding, removing, or renaming source files or public classes/functions, up
 ### File Map
 
 <!-- One line per source file: relative path - brief description -->
-src/index.js - App entry point, MUI theme config, React root render
-src/App.js - Main UI component: passphrase generation, copy-to-clipboard, length indicator
+src/index.js - App entry point, MUI theme config, ErrorBoundary wrapper, React root render
+src/App.js - Main UI component: passphrase generation, copy-to-clipboard, min/max length sliders
+src/ErrorBoundary.js - React error boundary with fallback UI
 src/index.css - Base body/code font styles
-src/wordListUtils.js - Fetches wordlist.txt, picks random unique words for passphrases
+src/wordListUtils.js - Fetches wordlist.txt (7772 EFF diceware words), generates length-constrained passphrases
 
 public/index.html - HTML shell with Google Fonts (Roboto) and root div
-public/wordlist.txt - Static wordlist (3815 words, one per line)
+public/wordlist.txt - EFF Large Diceware wordlist (7772 words, one per line)
 public/manifest.json - PWA manifest
 
 Dockerfile - Multi-stage build: node:18-alpine → nginx:alpine
+nginx.conf - Nginx config with security headers (CSP, X-Frame-Options, etc.)
 
 ## Project Overview
 
-A lightweight React app that generates secure three-word passphrases from a static wordlist. Built with Create React App and Material UI 5. All generation happens client-side — no backend.
+A lightweight React app that generates secure multi-word passphrases from the EFF Large Diceware wordlist (7772 words). Users configure min/max character length via sliders; the generator finds a passphrase within those constraints. Built with Create React App and Material UI 5. All generation happens client-side — no backend.
 
 ## Commands
 
@@ -35,17 +37,18 @@ A lightweight React app that generates secure three-word passphrases from a stat
 
 ## Architecture
 
-The app is a single-page React application with three source files:
+The app is a single-page React application:
 
-- `src/index.js` — Entry point. Creates the MUI theme (primary `#556cd6`, secondary `#19857b`) and renders `<App />` inside `<ThemeProvider>`.
-- `src/App.js` — The entire UI in one component. Manages state for the generated password, copy-to-clipboard feedback, and a character count / minimum-length indicator (16 chars). Calls `getRandomWordsEfficient()` to generate passphrases.
-- `src/wordListUtils.js` — Fetches `public/wordlist.txt` (3815 words, one per line) via `fetch('/wordlist.txt')`, picks unique random words, returns them lowercased. Exports three functions; the app uses `getRandomWordsEfficient(count)` which fetches the file once per generation.
+- `src/index.js` — Entry point. Creates the MUI theme (primary `#556cd6`, secondary `#19857b`) and renders `<App />` inside `<ErrorBoundary>` and `<ThemeProvider>`.
+- `src/App.js` — The entire UI in one component. Manages state for the generated password, copy-to-clipboard feedback, and min/max character length sliders (default 16–32). Calls `getRandomWordsWithinLength(min, max)` to generate passphrases.
+- `src/ErrorBoundary.js` — Class component that catches render errors and displays a fallback UI with a refresh prompt.
+- `src/wordListUtils.js` — Fetches `public/wordlist.txt` (7772 EFF diceware words) via `fetch('/wordlist.txt')`, caches in memory, uses `crypto.getRandomValues()` with rejection sampling for unbiased randomness, and Fisher-Yates shuffle for word selection. Exports four functions: `getRandomWord()`, `getRandomWords(count)`, `getRandomWordsWithinLength(min, max, attempts)`, and `clearWordListCache()`.
 
-The wordlist lives at `public/wordlist.txt` and is served as a static asset. It is **not** bundled into JS — it's fetched at runtime.
+The wordlist lives at `public/wordlist.txt` and is served as a static asset. It is **not** bundled into JS — it's fetched at runtime and cached.
 
 ## Docker Deployment
 
-The `Dockerfile` uses a two-stage build: builds the React app with node:18-alpine, then copies the `build/` output into nginx:alpine. Run with `docker run -p 8080:80 password-generator`. Targeted at Unraid server deployment.
+The `Dockerfile` uses a two-stage build: builds the React app with node:18-alpine, then copies the `build/` output into nginx:alpine with a custom `nginx.conf` that sets security headers (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy). Run with `docker run -p 8080:80 password-generator`. Targeted at Unraid server deployment.
 
 ## UI Design Workflow
 

@@ -21,8 +21,8 @@ A lightweight web application that generates secure three-word passphrases. Buil
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/password-generator.git
-cd password-generator
+git clone https://github.com/dervish666/PasswordGenerator.git
+cd PasswordGenerator
 ```
 
 2. Install dependencies

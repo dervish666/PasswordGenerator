@@ -2,6 +2,7 @@
 
 // In-memory cache for the wordlist to avoid repeated HTTP fetches
 let cachedWordList = null;
+let cachedWordStats = null;
 
 /**
  * Returns a cryptographically secure random integer in [0, max)
@@ -56,6 +57,11 @@ const getWordList = async () => {
   }
 
   cachedWordList = words;
+  cachedWordStats = {
+    shortest: Math.min(...words.map(w => w.length)),
+    longest: Math.max(...words.map(w => w.length)),
+    avg: words.reduce((sum, w) => sum + w.length, 0) / words.length,
+  };
   return words;
 };
 
@@ -64,6 +70,7 @@ const getWordList = async () => {
  */
 export const clearWordListCache = () => {
   cachedWordList = null;
+  cachedWordStats = null;
 };
 
 /**
@@ -116,14 +123,7 @@ export const getRandomWordsWithinLength = async (minLength = 16, maxLength = 32,
   }
 
   const allWords = await getWordList();
-
-  // Pre-sort words by length for smarter selection when we need to adjust
-  const shortestWordLen = Math.min(...allWords.map(w => w.length));
-  const longestWordLen = Math.max(...allWords.map(w => w.length));
-
-  // Estimate a reasonable starting word count:
-  // Average word length plus a space separator
-  const avgWordLen = allWords.reduce((sum, w) => sum + w.length, 0) / allWords.length;
+  const { shortest: shortestWordLen, longest: longestWordLen, avg: avgWordLen } = cachedWordStats;
   const targetLen = (minLength + maxLength) / 2;
   let targetWordCount = Math.max(2, Math.min(6, Math.round(targetLen / (avgWordLen + 1))));
 

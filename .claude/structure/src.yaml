@@ -5,41 +5,56 @@ description: React application source files
 
 files:
   index.js:
-    description: App entry point - creates MUI theme and renders App
+    description: App entry point - creates MUI theme, wraps App in ErrorBoundary and ThemeProvider
     exports: []
     imports:
       - from: ./App
         items: [App]
+      - from: ./ErrorBoundary
+        items: [ErrorBoundary]
 
   App.js:
-    description: Main UI component - passphrase generation, clipboard copy, length check
+    description: Main UI component - passphrase generation, clipboard copy, min/max length sliders
     exports:
       - name: App
         kind: function
         returns: JSX.Element
-        description: Single-component app with password state, copy-to-clipboard, and 16-char minimum length indicator
+        description: Single-component app with password state, copy-to-clipboard, and min/max character length sliders
     imports:
       - from: ./wordListUtils
-        items: [getRandomWordsEfficient]
+        items: [getRandomWordsWithinLength]
+
+  ErrorBoundary.js:
+    description: React error boundary - catches render errors and shows fallback UI
+    exports:
+      - name: ErrorBoundary
+        kind: class
+        returns: JSX.Element
+        description: Wraps children and catches errors during rendering, showing a refresh prompt on failure
 
   wordListUtils.js:
-    description: Utilities for fetching random words from public/wordlist.txt (3815 words)
+    description: Utilities for fetching random words from public/wordlist.txt (7772 EFF diceware words)
     exports:
       - name: getRandomWord
         kind: function
         params: []
         returns: Promise<string>
-        description: Fetches wordlist.txt and returns one random lowercase word
+        description: Returns one random lowercase word from the cached wordlist
       - name: getRandomWords
         kind: function
         params: [{name: count, type: number, default: 3}]
         returns: Promise<string[]>
-        description: Calls getRandomWord N times sequentially (less efficient)
-      - name: getRandomWordsEfficient
+        description: Returns N unique random words using Fisher-Yates partial shuffle
+      - name: getRandomWordsWithinLength
         kind: function
-        params: [{name: count, type: number, default: 3}]
-        returns: Promise<string[]>
-        description: Fetches wordlist once, picks N unique random lowercase words. Used by App.
+        params: [{name: minLength, type: number, default: 16}, {name: maxLength, type: number, default: 32}, {name: maxAttempts, type: number, default: 100}]
+        returns: "Promise<{words: string[], password: string, success: boolean}>"
+        description: Generates a space-separated passphrase within character length constraints. Used by App.
+      - name: clearWordListCache
+        kind: function
+        params: []
+        returns: void
+        description: Clears the in-memory wordlist cache (used for testing)
 
   index.css:
     description: Base font styles for body and code elements

@@ -18,11 +18,10 @@ import { getRandomWordsWithinLength } from './wordListUtils';
 
 function App() {
   const [password, setPassword] = useState('');
-  const [copied, setCopied] = useState(false);
   const [minLength, setMinLength] = useState(16);
   const [maxLength, setMaxLength] = useState(32);
   const [generating, setGenerating] = useState(false);
-  const [error, setError] = useState('');
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Derived values computed during render — no useEffect needed
   const charCount = password.length;
@@ -46,7 +45,6 @@ function App() {
   const generatePassword = useCallback(async () => {
     if (generating) return; // Prevent concurrent generation (race condition guard)
     setGenerating(true);
-    setError('');
 
     try {
       const result = await getRandomWordsWithinLength(minLength, maxLength);
@@ -56,13 +54,12 @@ function App() {
       } else if (result.password) {
         // Best-effort result that didn't meet exact constraints
         setPassword(result.password);
-        setError('Could not find an exact match for your length constraints. Showing closest result.');
+        setSnackbar({ open: true, message: 'Could not find an exact match for your length constraints. Showing closest result.', severity: 'warning' });
       } else {
-        setError('Could not generate a password with these constraints. Try widening the length range.');
+        setSnackbar({ open: true, message: 'Could not generate a password with these constraints. Try widening the length range.', severity: 'warning' });
       }
     } catch (err) {
-      console.error('Error generating password:', err);
-      setError('Failed to generate password. Please try again.');
+      setSnackbar({ open: true, message: 'Failed to generate password. Please try again.', severity: 'warning' });
     } finally {
       setGenerating(false);
     }
@@ -86,22 +83,19 @@ function App() {
         document.execCommand('copy');
         document.body.removeChild(textArea);
       }
-      setCopied(true);
+      setSnackbar({ open: true, message: 'Password copied to clipboard!', severity: 'success' });
     } catch (err) {
-      console.error('Failed to copy text: ', err);
-      setError('Failed to copy to clipboard.');
+      setSnackbar({ open: true, message: 'Failed to copy to clipboard.', severity: 'warning' });
     }
   }, [password]);
 
-  // Handle close of the copy notification
-  const handleCloseAlert = (event, reason) => {
+  const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') return;
-    setCopied(false);
-    setError('');
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="sm" component="main">
       <Box sx={{ my: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Password Generator
@@ -124,6 +118,7 @@ function App() {
               max={64}
               step={1}
               valueLabelDisplay="auto"
+              aria-label="Minimum character length"
               sx={{ mb: 2 }}
             />
 
@@ -137,6 +132,7 @@ function App() {
               max={64}
               step={1}
               valueLabelDisplay="auto"
+              aria-label="Maximum character length"
             />
           </Box>
 
@@ -165,6 +161,9 @@ function App() {
                   value={password}
                   InputProps={{
                     readOnly: true,
+                  }}
+                  inputProps={{
+                    'aria-label': 'Generated password',
                   }}
                 />
                 <IconButton
@@ -213,15 +212,13 @@ function App() {
         </Paper>
       </Box>
 
-      <Snackbar open={copied} autoHideDuration={3000} onClose={handleCloseAlert}>
-        <Alert onClose={handleCloseAlert} severity="success" sx={{ width: '100%' }}>
-          Password copied to clipboard!
-        </Alert>
-      </Snackbar>
-
-      <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseAlert}>
-        <Alert onClose={handleCloseAlert} severity="warning" sx={{ width: '100%' }}>
-          {error}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={snackbar.severity === 'success' ? 3000 : 6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </Container>
