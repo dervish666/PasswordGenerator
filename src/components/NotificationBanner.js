@@ -1,0 +1,26 @@
+import React, { useEffect } from 'react';
+
+const WarningIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+
+export default function NotificationBanner({ message, severity, autoDismissMs = 0, onDismiss }) {
+  useEffect(() => {
+    if (!message || !autoDismissMs || !onDismiss) return;
+    const timer = setTimeout(onDismiss, autoDismissMs);
+    return () => clearTimeout(timer);
+  }, [message, autoDismissMs, onDismiss]);
+
+  if (!message) return null;
+
+  return (
+    <div className="notification" role="alert">
+      <WarningIcon />
+      <span>{message}</span>
+    </div>
+  );
+}
