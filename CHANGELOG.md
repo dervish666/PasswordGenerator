@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.0.1] - 2026-03-17
+
+### Changed
+- Widened app container from 480px to 560px so three-word passphrases (~20 chars) display on one line
+
 ## [2.0.0] - 2026-03-17
 
 ### Changed

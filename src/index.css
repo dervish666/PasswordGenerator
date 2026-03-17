@@ -37,7 +37,7 @@ body {
 
 /* --- Layout --- */
 .app-container {
-  max-width: 480px;
+  max-width: 560px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
   min-height: 100vh;
@@ -381,7 +381,7 @@ body {
 
 /* --- Error Boundary --- */
 .error-container {
-  max-width: 480px;
+  max-width: 560px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
   min-height: 100vh;
