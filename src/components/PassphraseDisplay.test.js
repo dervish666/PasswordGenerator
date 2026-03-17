@@ -32,6 +32,12 @@ test('shows warning when below minimum', () => {
   expect(screen.getByText(/below minimum/i)).toBeInTheDocument();
 });
 
+test('shows warning when exceeds maximum', () => {
+  // "alpha bravo charlie delta echo" = 30 chars, exceeds max of 10
+  render(<PassphraseDisplay password="alpha bravo charlie delta echo" minLength={8} maxLength={10} onCopy={() => {}} />);
+  expect(screen.getByText(/exceeds maximum/i)).toBeInTheDocument();
+});
+
 test('has aria-live region for passphrase', () => {
   render(<PassphraseDisplay password="test words" minLength={8} maxLength={32} onCopy={() => {}} />);
   const region = screen.getByTestId('passphrase-display');

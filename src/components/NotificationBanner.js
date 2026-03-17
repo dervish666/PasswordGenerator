@@ -18,7 +18,7 @@ export default function NotificationBanner({ message, severity, autoDismissMs = 
   if (!message) return null;
 
   return (
-    <div className="notification" role="alert">
+    <div className={`notification${severity ? ` notification--${severity}` : ''}`} role="alert">
       <WarningIcon />
       <span>{message}</span>
     </div>

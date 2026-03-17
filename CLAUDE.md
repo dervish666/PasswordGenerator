@@ -61,10 +61,6 @@ The wordlist lives at `public/wordlist.txt` and is served as a static asset. It 
 
 The `Dockerfile` uses a two-stage build: builds the React app with node:18-alpine, then copies the `build/` output into nginx:alpine with a custom `nginx.conf` that sets security headers (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy). Run with `docker run -p 8080:80 password-generator`. Targeted at Unraid server deployment.
 
-## Terminal Multiplexer
-
-This project uses **cmux** as its terminal multiplexer. Run `cmux --help` to discover available commands and maximise usage (pane management, session handling, layouts, etc.).
-
 ## UI Design Workflow
 
 When asked to design UI or frontend interfaces, follow the step-by-step workflow defined in `.cursor/rules/design.mdc`:
@@ -74,25 +70,3 @@ When asked to design UI or frontend interfaces, follow the step-by-step workflow
 4. Generate HTML file
 
 Design iterations go in `.superdesign/design_iterations/` with naming convention `{name}_{n}.html`. Use Flowbite as base styling, avoid indigo/blue unless requested, use Google Fonts.
-
-## Design Context
-
-Full design context lives in `.impeccable.md`. Key principles:
-
-### Users
-Public-facing tool — anyone on the internet generating secure diceware passphrases. Trust must be established instantly through visual design.
-
-### Brand Personality
-**Bold, modern, trustworthy.** Three words: **bold, credible, sharp.** Think Linear, Raycast, Vercel.
-
-### Aesthetic Direction
-- **Dark mode with vibrant accent color** — deep near-black backgrounds with a bold, high-contrast accent.
-- **Fresh palette** — avoid the old muted purple-blue/teal. Choose something vivid and distinctive.
-- **Anti-references:** Generic MUI defaults, bland corporate dashboards, un-styled framework demos.
-
-### Design Principles
-1. **Instant trust** — Communicate security and competence within the first second.
-2. **One job, done well** — Every pixel earns its place.
-3. **Bold, not loud** — Impact through contrast, typography, and whitespace.
-4. **Accessible by default** — WCAG AA contrast, visible focus states, reduced-motion support.
-5. **Copy-first interaction** — The passphrase and copy action are the hero.
