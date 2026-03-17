@@ -11,13 +11,18 @@ After adding, removing, or renaming source files or public classes/functions, up
 ### File Map
 
 <!-- One line per source file: relative path - brief description -->
-src/index.js - App entry point, MUI theme config, ErrorBoundary wrapper, React root render
+src/index.js - App entry point, ErrorBoundary wrapper, React root render
 src/App.js - Main UI component: passphrase generation, copy-to-clipboard, min/max length sliders
 src/ErrorBoundary.js - React error boundary with fallback UI
-src/index.css - Base body/code font styles
+src/index.css - "The Terminal" design system: CSS tokens, component styles, animations, reduced-motion
 src/wordListUtils.js - Fetches wordlist.txt (7772 EFF diceware words), generates length-constrained passphrases
+src/components/CopyButton.js - Accent pill button with copy/copied states, inline SVG icons
+src/components/RangeSlider.js - Custom range slider with accent track fill and value label
+src/components/GenerateButton.js - Full-width accent button with loading shimmer state
+src/components/NotificationBanner.js - Inline warning/error banner with auto-dismiss
+src/components/PassphraseDisplay.js - Hero panel: passphrase word spans, status line, copy button
 
-public/index.html - HTML shell with Google Fonts (Roboto) and root div
+public/index.html - HTML shell with Google Fonts (Inter + JetBrains Mono) and root div
 public/wordlist.txt - EFF Large Diceware wordlist (7772 words, one per line)
 public/manifest.json - PWA manifest
 
@@ -26,7 +31,7 @@ nginx.conf - Nginx config with security headers (CSP, X-Frame-Options, etc.)
 
 ## Project Overview
 
-A lightweight React app that generates secure multi-word passphrases from the EFF Large Diceware wordlist (7772 words). Users configure min/max character length via sliders; the generator finds a passphrase within those constraints. Built with Create React App and Material UI 5. All generation happens client-side — no backend.
+A lightweight React app that generates secure multi-word passphrases from the EFF Large Diceware wordlist (7772 words). Users configure min/max character length via sliders; the generator finds a passphrase within those constraints. Built with Create React App and custom CSS ("The Terminal" dark theme with electric cyan accent). All generation happens client-side — no backend.
 
 ## Commands
 
@@ -39,8 +44,14 @@ A lightweight React app that generates secure multi-word passphrases from the EF
 
 The app is a single-page React application:
 
-- `src/index.js` — Entry point. Creates the MUI theme (primary `#556cd6`, secondary `#19857b`) and renders `<App />` inside `<ErrorBoundary>` and `<ThemeProvider>`.
-- `src/App.js` — The entire UI in one component. Manages state for the generated password, copy-to-clipboard feedback, and min/max character length sliders (default 16–32). Calls `getRandomWordsWithinLength(min, max)` to generate passphrases.
+- `src/index.js` — Entry point. Renders `<App />` inside `<ErrorBoundary>` and `<StrictMode>`.
+- `src/index.css` — "The Terminal" design system. CSS custom properties for colors/fonts, component styles, keyframe animations (word reveal, shimmer, pulse), and `prefers-reduced-motion` support.
+- `src/App.js` — Main component. Manages state for passphrase, sliders, generation, and notifications. Composes PassphraseDisplay, RangeSlider, GenerateButton, and NotificationBanner.
+- `src/components/PassphraseDisplay.js` — Hero panel. Renders each word as an animated `<span>`, shows character count and range status, includes CopyButton.
+- `src/components/CopyButton.js` — Accent pill button. Shows "Copy" → "Copied!" with 2s auto-revert and scale pulse animation.
+- `src/components/RangeSlider.js` — Custom `<input type="range">` with accent-colored fill track, label, and value display.
+- `src/components/GenerateButton.js` — Full-width accent button with shimmer animation during loading.
+- `src/components/NotificationBanner.js` — Inline alert banner for warnings/errors with optional auto-dismiss timer.
 - `src/ErrorBoundary.js` — Class component that catches render errors and displays a fallback UI with a refresh prompt.
 - `src/wordListUtils.js` — Fetches `public/wordlist.txt` (7772 EFF diceware words) via `fetch('/wordlist.txt')`, caches in memory, uses `crypto.getRandomValues()` with rejection sampling for unbiased randomness, and Fisher-Yates shuffle for word selection. Exports four functions: `getRandomWord()`, `getRandomWords(count)`, `getRandomWordsWithinLength(min, max, attempts)`, and `clearWordListCache()`.
 
@@ -49,6 +60,10 @@ The wordlist lives at `public/wordlist.txt` and is served as a static asset. It 
 ## Docker Deployment
 
 The `Dockerfile` uses a two-stage build: builds the React app with node:18-alpine, then copies the `build/` output into nginx:alpine with a custom `nginx.conf` that sets security headers (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy). Run with `docker run -p 8080:80 password-generator`. Targeted at Unraid server deployment.
+
+## Terminal Multiplexer
+
+This project uses **cmux** as its terminal multiplexer. Run `cmux --help` to discover available commands and maximise usage (pane management, session handling, layouts, etc.).
 
 ## UI Design Workflow
 
@@ -59,3 +74,25 @@ When asked to design UI or frontend interfaces, follow the step-by-step workflow
 4. Generate HTML file
 
 Design iterations go in `.superdesign/design_iterations/` with naming convention `{name}_{n}.html`. Use Flowbite as base styling, avoid indigo/blue unless requested, use Google Fonts.
+
+## Design Context
+
+Full design context lives in `.impeccable.md`. Key principles:
+
+### Users
+Public-facing tool — anyone on the internet generating secure diceware passphrases. Trust must be established instantly through visual design.
+
+### Brand Personality
+**Bold, modern, trustworthy.** Three words: **bold, credible, sharp.** Think Linear, Raycast, Vercel.
+
+### Aesthetic Direction
+- **Dark mode with vibrant accent color** — deep near-black backgrounds with a bold, high-contrast accent.
+- **Fresh palette** — avoid the old muted purple-blue/teal. Choose something vivid and distinctive.
+- **Anti-references:** Generic MUI defaults, bland corporate dashboards, un-styled framework demos.
+
+### Design Principles
+1. **Instant trust** — Communicate security and competence within the first second.
+2. **One job, done well** — Every pixel earns its place.
+3. **Bold, not loud** — Impact through contrast, typography, and whitespace.
+4. **Accessible by default** — WCAG AA contrast, visible focus states, reduced-motion support.
+5. **Copy-first interaction** — The passphrase and copy action are the hero.
