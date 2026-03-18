@@ -6,7 +6,7 @@ import * as wordListUtils from './wordListUtils';
 const renderApp = () => render(<App />);
 
 beforeEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
   wordListUtils.clearWordListCache();
 });
 
@@ -41,7 +41,7 @@ describe('Initial render', () => {
 // =========================================================================
 describe('Password generation', () => {
   test('displays generated password after clicking button', async () => {
-    jest.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
+    vi.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
       words: ['alpha', 'bravo', 'charlie'],
       password: 'alpha bravo charlie',
       success: true,
@@ -58,7 +58,7 @@ describe('Password generation', () => {
   });
 
   test('shows warning when generation returns success: false with password', async () => {
-    jest.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
+    vi.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
       words: ['short'],
       password: 'short',
       success: false,
@@ -73,7 +73,7 @@ describe('Password generation', () => {
   });
 
   test('shows error when generation returns no password', async () => {
-    jest.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
+    vi.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
       words: [],
       password: '',
       success: false,
@@ -88,7 +88,7 @@ describe('Password generation', () => {
   });
 
   test('shows error when generation throws', async () => {
-    jest.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockRejectedValue(
+    vi.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockRejectedValue(
       new Error('Network failure')
     );
 
@@ -102,7 +102,7 @@ describe('Password generation', () => {
 
   test('button is disabled while generating', async () => {
     let resolveGeneration;
-    jest.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockImplementation(
+    vi.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockImplementation(
       () => new Promise(resolve => { resolveGeneration = resolve; })
     );
 
@@ -133,12 +133,12 @@ describe('Password generation', () => {
 // =========================================================================
 describe('Copy to clipboard', () => {
   test('copies password to clipboard and shows Copied state', async () => {
-    const writeText = jest.fn().mockResolvedValue(undefined);
+    const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, {
       clipboard: { writeText },
     });
 
-    jest.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
+    vi.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
       words: ['delta', 'echo', 'foxtrot'],
       password: 'delta echo foxtrot',
       success: true,
@@ -167,7 +167,7 @@ describe('Copy to clipboard', () => {
 // =========================================================================
 describe('Character count display', () => {
   test('shows character count after generation', async () => {
-    jest.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
+    vi.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
       words: ['alpha', 'bravo'],
       password: 'alpha bravo', // 11 chars
       success: true,
@@ -182,7 +182,7 @@ describe('Character count display', () => {
   });
 
   test('shows "Meets range" when within range', async () => {
-    jest.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
+    vi.spyOn(wordListUtils, 'getRandomWordsWithinLength').mockResolvedValue({
       words: ['alpha', 'bravo', 'charlie'],
       password: 'alpha bravo charlie', // 19 chars, default min=16, max=32
       success: true,

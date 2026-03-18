@@ -18,14 +18,14 @@ test('is disabled when loading', () => {
 });
 
 test('calls onClick when clicked', () => {
-  const onClick = jest.fn();
+  const onClick = vi.fn();
   render(<GenerateButton loading={false} onClick={onClick} />);
   fireEvent.click(screen.getByRole('button'));
   expect(onClick).toHaveBeenCalledTimes(1);
 });
 
 test('does not call onClick when disabled', () => {
-  const onClick = jest.fn();
+  const onClick = vi.fn();
   render(<GenerateButton loading={true} onClick={onClick} />);
   fireEvent.click(screen.getByRole('button'));
   expect(onClick).not.toHaveBeenCalled();

@@ -3,11 +3,11 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import CopyButton from './CopyButton';
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 test('renders with "Copy" text', () => {
@@ -17,7 +17,7 @@ test('renders with "Copy" text', () => {
 });
 
 test('calls onCopy and shows "Copied!" on click', async () => {
-  const onCopy = jest.fn().mockResolvedValue(undefined);
+  const onCopy = vi.fn().mockResolvedValue(undefined);
   render(<CopyButton text="hello" onCopy={onCopy} />);
 
   await act(async () => {
@@ -30,7 +30,7 @@ test('calls onCopy and shows "Copied!" on click', async () => {
 });
 
 test('reverts to "Copy" after 2 seconds', async () => {
-  const onCopy = jest.fn().mockResolvedValue(undefined);
+  const onCopy = vi.fn().mockResolvedValue(undefined);
   render(<CopyButton text="hello" onCopy={onCopy} />);
 
   await act(async () => {
@@ -39,7 +39,7 @@ test('reverts to "Copy" after 2 seconds', async () => {
 
   expect(screen.getByText('Copied!')).toBeInTheDocument();
 
-  act(() => { jest.advanceTimersByTime(2000); });
+  act(() => { vi.advanceTimersByTime(2000); });
 
   expect(screen.getByText('Copy')).toBeInTheDocument();
 });

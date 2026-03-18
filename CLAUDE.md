@@ -11,18 +11,19 @@ After adding, removing, or renaming source files or public classes/functions, up
 ### File Map
 
 <!-- One line per source file: relative path - brief description -->
-src/index.js - App entry point, ErrorBoundary wrapper, React root render
-src/App.js - Main UI component: passphrase generation, copy-to-clipboard, min/max length sliders
-src/ErrorBoundary.js - React error boundary with fallback UI
+src/main.jsx - App entry point, ErrorBoundary wrapper, React root render
+src/App.jsx - Main UI component: passphrase generation, copy-to-clipboard, min/max length sliders
+src/ErrorBoundary.jsx - React error boundary with fallback UI
 src/index.css - "The Terminal" design system: CSS tokens, component styles, animations, reduced-motion
 src/wordListUtils.js - Fetches wordlist.txt (7772 EFF diceware words), generates length-constrained passphrases
-src/components/CopyButton.js - Accent pill button with copy/copied states, inline SVG icons
-src/components/RangeSlider.js - Custom range slider with accent track fill and value label
-src/components/GenerateButton.js - Full-width accent button with loading shimmer state
-src/components/NotificationBanner.js - Inline warning/error banner with auto-dismiss
-src/components/PassphraseDisplay.js - Hero panel: passphrase word spans, status line, copy button
+src/components/CopyButton.jsx - Accent pill button with copy/copied states, inline SVG icons
+src/components/RangeSlider.jsx - Custom range slider with accent track fill and value label
+src/components/GenerateButton.jsx - Full-width accent button with loading shimmer state
+src/components/NotificationBanner.jsx - Inline warning/error banner with auto-dismiss
+src/components/PassphraseDisplay.jsx - Hero panel: passphrase word spans, status line, copy button
+vite.config.js - Vite config: React plugin, dev server port 3000, build to build/, vitest setup
 
-public/index.html - HTML shell with Google Fonts (Inter + JetBrains Mono) and root div
+index.html - HTML shell with Google Fonts (Inter + JetBrains Mono), module script entry point
 public/wordlist.txt - EFF Large Diceware wordlist (7772 words, one per line)
 public/manifest.json - PWA manifest
 
@@ -31,28 +32,30 @@ nginx.conf - Nginx config with security headers (CSP, X-Frame-Options, etc.)
 
 ## Project Overview
 
-A lightweight React app that generates secure multi-word passphrases from the EFF Large Diceware wordlist (7772 words). Users configure min/max character length via sliders; the generator finds a passphrase within those constraints. Built with Create React App and custom CSS ("The Terminal" dark theme with electric cyan accent). All generation happens client-side — no backend.
+A lightweight React app that generates secure multi-word passphrases from the EFF Large Diceware wordlist (7772 words). Users configure min/max character length via sliders; the generator finds a passphrase within those constraints. Built with Vite and custom CSS ("The Terminal" dark theme with electric cyan accent). All generation happens client-side — no backend.
 
 ## Commands
 
-- `npm start` — dev server on localhost:3000
-- `npm run build` — production build to `build/`
-- `npm test` — run tests (Jest via react-scripts)
+- `npm start` — Vite dev server on localhost:3000
+- `npm run build` — Vite production build to `build/`
+- `npm test` — run tests (Vitest)
+- `npm run test:watch` — run tests in watch mode
+- `npm run preview` — preview production build locally
 - `docker build -t password-generator .` — multi-stage Docker build (node:18-alpine → nginx:alpine, serves on port 80)
 
 ## Architecture
 
 The app is a single-page React application:
 
-- `src/index.js` — Entry point. Renders `<App />` inside `<ErrorBoundary>` and `<StrictMode>`.
+- `src/main.jsx` — Entry point. Renders `<App />` inside `<ErrorBoundary>` and `<StrictMode>`.
 - `src/index.css` — "The Terminal" design system. CSS custom properties for colors/fonts, component styles, keyframe animations (word reveal, shimmer, pulse), and `prefers-reduced-motion` support.
-- `src/App.js` — Main component. Manages state for passphrase, sliders, generation, and notifications. Composes PassphraseDisplay, RangeSlider, GenerateButton, and NotificationBanner.
-- `src/components/PassphraseDisplay.js` — Hero panel. Renders each word as an animated `<span>`, shows character count and range status, includes CopyButton.
-- `src/components/CopyButton.js` — Accent pill button. Shows "Copy" → "Copied!" with 2s auto-revert and scale pulse animation.
-- `src/components/RangeSlider.js` — Custom `<input type="range">` with accent-colored fill track, label, and value display.
-- `src/components/GenerateButton.js` — Full-width accent button with shimmer animation during loading.
-- `src/components/NotificationBanner.js` — Inline alert banner for warnings/errors with optional auto-dismiss timer.
-- `src/ErrorBoundary.js` — Class component that catches render errors and displays a fallback UI with a refresh prompt.
+- `src/App.jsx` — Main component. Manages state for passphrase, sliders, generation, and notifications. Composes PassphraseDisplay, RangeSlider, GenerateButton, and NotificationBanner.
+- `src/components/PassphraseDisplay.jsx` — Hero panel. Renders each word as an animated `<span>`, shows character count and range status, includes CopyButton.
+- `src/components/CopyButton.jsx` — Accent pill button. Shows "Copy" → "Copied!" with 2s auto-revert and scale pulse animation.
+- `src/components/RangeSlider.jsx` — Custom `<input type="range">` with accent-colored fill track, label, and value display.
+- `src/components/GenerateButton.jsx` — Full-width accent button with shimmer animation during loading.
+- `src/components/NotificationBanner.jsx` — Inline alert banner for warnings/errors with optional auto-dismiss timer.
+- `src/ErrorBoundary.jsx` — Class component that catches render errors and displays a fallback UI with a refresh prompt.
 - `src/wordListUtils.js` — Fetches `public/wordlist.txt` (7772 EFF diceware words) via `fetch('/wordlist.txt')`, caches in memory, uses `crypto.getRandomValues()` with rejection sampling for unbiased randomness, and Fisher-Yates shuffle for word selection. Exports four functions: `getRandomWord()`, `getRandomWords(count)`, `getRandomWordsWithinLength(min, max, attempts)`, and `clearWordListCache()`.
 
 The wordlist lives at `public/wordlist.txt` and is served as a static asset. It is **not** bundled into JS — it's fetched at runtime and cached.

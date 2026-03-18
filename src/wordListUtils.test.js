@@ -24,7 +24,7 @@ let realWordlistContent = null;
  * Mock fetch to return a wordlist string.
  */
 const mockFetch = (content) => {
-  global.fetch = jest.fn(() =>
+  global.fetch = vi.fn(() =>
     Promise.resolve({
       ok: true,
       text: () => Promise.resolve(content),
@@ -33,7 +33,7 @@ const mockFetch = (content) => {
 };
 
 const mockFetchFailure = (status = 500) => {
-  global.fetch = jest.fn(() =>
+  global.fetch = vi.fn(() =>
     Promise.resolve({
       ok: false,
       status,
@@ -43,12 +43,12 @@ const mockFetchFailure = (status = 500) => {
 };
 
 const mockFetchNetworkError = () => {
-  global.fetch = jest.fn(() => Promise.reject(new Error('Network error')));
+  global.fetch = vi.fn(() => Promise.reject(new Error('Network error')));
 };
 
 beforeEach(() => {
   clearWordListCache();
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 // =========================================================================
@@ -57,8 +57,8 @@ beforeEach(() => {
 describe('Cryptographic randomness', () => {
   test('uses crypto.getRandomValues, not Math.random', async () => {
     mockFetch(MOCK_WORDLIST);
-    const mathRandomSpy = jest.spyOn(Math, 'random');
-    const cryptoSpy = jest.spyOn(window.crypto, 'getRandomValues');
+    const mathRandomSpy = vi.spyOn(Math, 'random');
+    const cryptoSpy = vi.spyOn(window.crypto, 'getRandomValues');
 
     await getRandomWord();
 

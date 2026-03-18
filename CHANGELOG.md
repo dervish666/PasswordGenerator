@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.1.0] - 2026-03-18
+
+### Changed
+- **Migrated from Create React App to Vite** — faster dev server, faster builds, modern toolchain
+- **Migrated from Jest to Vitest** — same test API, runs on Vite infrastructure
+- Renamed `.js` → `.jsx` for all files containing JSX
+- Entry point renamed from `src/index.js` to `src/main.jsx`
+- `index.html` moved from `public/` to project root (Vite convention)
+
+### Security
+- **Resolved all 26 npm vulnerabilities** — all were in `react-scripts` transitive dependencies (jest 27, jsdom, webpack-dev-server, postcss, svgo, serialize-javascript, underscore)
+
+### Removed
+- `react-scripts` dependency and all CRA tooling
+
 ## [2.0.1] - 2026-03-17
 
 ### Changed

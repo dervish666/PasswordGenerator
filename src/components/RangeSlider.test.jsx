@@ -24,7 +24,7 @@ test('falls back to label for aria-label when ariaLabel not provided', () => {
 });
 
 test('calls onChange when value changes', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   render(<RangeSlider label="Min" value={16} min={8} max={64} onChange={onChange} />);
   fireEvent.change(screen.getByRole('slider'), { target: { value: '24' } });
   expect(onChange).toHaveBeenCalled();
