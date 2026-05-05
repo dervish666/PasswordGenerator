@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.3.0] - 2026-05-05
+
+### Changed
+- **Bumped Docker base image** from `node:18-alpine` to `node:22-alpine` — Vite 8 requires Node 20.19+ and was failing the build
+- **React 18 → 19** (`react`, `react-dom` to ^19.2.5) — no app code changes needed
+- **Vite 8.0.0 → 8.0.10**
+- **Vitest 4.1.0 → 4.1.5**
+- **jsdom 29.0.0 → 29.1.1**
+- **@peculiar/webcrypto 1.5.0 → 1.7.1**
+
+### Security
+- Resolved moderate-severity `yaml` advisory (GHSA-48c2-rrv3-qjmp) via `npm audit fix`
+
 ## [2.2.0] - 2026-05-05
 
 ### Added

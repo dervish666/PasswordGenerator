@@ -15,7 +15,7 @@ A client-side React app that generates secure multi-word passphrases from the EF
 - `npx vitest run src/components/CopyButton.test.jsx` — run a single test file
 - `npx vitest run -t "shows character count"` — run tests matching a name pattern
 - `npm run preview` — preview production build locally
-- `docker build -t password-generator .` — Docker build (node:18-alpine → nginx:alpine, serves on port 80)
+- `docker build -t password-generator .` — Docker build (node:22-alpine → nginx:alpine, serves on port 80)
 - `docker run -p 8080:80 password-generator` — run the Docker container
 
 ## Architecture
@@ -61,4 +61,4 @@ Tests use **Vitest** (not Jest). The API is nearly identical but mocking uses `v
 
 ## Docker Deployment
 
-Two-stage build: node:18-alpine builds the app, nginx:alpine serves `build/` with security headers (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy) defined in `nginx.conf`. The CSP allows Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`). Targeted at Unraid server deployment.
+Two-stage build: node:22-alpine builds the app, nginx:alpine serves `build/` with security headers (CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy) defined in `nginx.conf`. The CSP allows Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`). Targeted at Unraid server deployment.
