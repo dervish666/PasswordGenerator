@@ -24,4 +24,7 @@ yarn-error.log*
 .idea/
 .vscode/
 *.swp
-*.swo.superpowers/
+*.swo
+
+# Local tooling
+.superpowers/

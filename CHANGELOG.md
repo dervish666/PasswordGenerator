@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.2.0] - 2026-05-05
+
+### Added
+- **Character requirement toggles** — Capital letter, Number, and Special char options for sites that demand them. The passphrase words stay readable; extras are appended at the start (capital) or end (digit, symbol)
+
+### Changed
+- Rewrote `CLAUDE.md` for clarity — condensed architecture overview, added design tokens, removed structure index
+
+### Fixed
+- `.gitignore` — split malformed `*.swo.superpowers/` line and added `.superpowers/` for local tooling
+
 ## [2.1.0] - 2026-03-18
 
 ### Changed

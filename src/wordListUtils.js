@@ -4,12 +4,8 @@
 let cachedWordList = null;
 let cachedWordStats = null;
 
-/**
- * Returns a cryptographically secure random integer in [0, max)
- * Uses crypto.getRandomValues() instead of Math.random() for security.
- * @param {number} max - Exclusive upper bound
- * @returns {number} Random integer
- */
+const SPECIAL_CHARS = '!@#$%&*?';
+
 const secureRandomInt = (max) => {
   const array = new Uint32Array(1);
   window.crypto.getRandomValues(array);
@@ -170,4 +166,23 @@ export const getRandomWordsWithinLength = async (minLength = 16, maxLength = 32,
 
   // Return the closest result we found
   return bestResult || { words: [], password: '', success: false };
+};
+
+export const applyRequirements = (password, requirements) => {
+  if (!password) return password;
+  let result = password;
+
+  if (requirements.capital) {
+    result = result.charAt(0).toUpperCase() + result.slice(1);
+  }
+
+  if (requirements.number) {
+    result = result + (secureRandomInt(9) + 1);
+  }
+
+  if (requirements.special) {
+    result = result + SPECIAL_CHARS[secureRandomInt(SPECIAL_CHARS.length)];
+  }
+
+  return result;
 };

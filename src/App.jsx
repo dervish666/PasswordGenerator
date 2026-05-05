@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import PassphraseDisplay from './components/PassphraseDisplay';
 import RangeSlider from './components/RangeSlider';
+import RequirementsToggles from './components/RequirementsToggles';
 import GenerateButton from './components/GenerateButton';
 import NotificationBanner from './components/NotificationBanner';
-import { getRandomWordsWithinLength } from './wordListUtils';
+import { getRandomWordsWithinLength, applyRequirements } from './wordListUtils';
 
 function App() {
   const [password, setPassword] = useState('');
@@ -12,6 +13,7 @@ function App() {
   const [generating, setGenerating] = useState(false);
   const [notification, setNotification] = useState({ message: '', severity: 'warning', autoDismissMs: 0 });
   const [animationKey, setAnimationKey] = useState(0);
+  const [requirements, setRequirements] = useState({ capital: false, number: false, special: false });
 
   const handleMinChange = (val) => {
     if (val <= maxLength) setMinLength(val);
@@ -30,10 +32,10 @@ function App() {
       const result = await getRandomWordsWithinLength(minLength, maxLength);
 
       if (result.success) {
-        setPassword(result.password);
+        setPassword(applyRequirements(result.password, requirements));
         setAnimationKey(k => k + 1);
       } else if (result.password) {
-        setPassword(result.password);
+        setPassword(applyRequirements(result.password, requirements));
         setAnimationKey(k => k + 1);
         setNotification({
           message: 'Could not find an exact match for your length constraints. Showing closest result.',
@@ -56,7 +58,7 @@ function App() {
     } finally {
       setGenerating(false);
     }
-  }, [minLength, maxLength, generating]);
+  }, [minLength, maxLength, generating, requirements]);
 
   const copyToClipboard = useCallback(async () => {
     if (!password) return;
@@ -114,6 +116,11 @@ function App() {
         min={8}
         max={64}
         onChange={handleMaxChange}
+      />
+
+      <RequirementsToggles
+        requirements={requirements}
+        onChange={(key) => setRequirements(r => ({ ...r, [key]: !r[key] }))}
       />
 
       <GenerateButton loading={generating} onClick={generatePassword} />
