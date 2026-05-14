@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 
 export default function RangeSlider({ label, ariaLabel, value, min, max, onChange }) {
   const inputRef = useRef(null);

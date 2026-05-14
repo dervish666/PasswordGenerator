@@ -4,8 +4,8 @@ directory: src/
 description: React application source files
 
 files:
-  index.js:
-    description: App entry point - creates MUI theme, wraps App in ErrorBoundary and ThemeProvider
+  main.jsx:
+    description: App entry point - renders App wrapped in ErrorBoundary and React.StrictMode
     exports: []
     imports:
       - from: ./App
@@ -13,27 +13,34 @@ files:
       - from: ./ErrorBoundary
         items: [ErrorBoundary]
 
-  App.js:
-    description: Main UI component - passphrase generation, clipboard copy, min/max length sliders
+  App.jsx:
+    description: Main UI component - passphrase generation, clipboard copy, min/max length sliders, requirements toggles
     exports:
       - name: App
         kind: function
         returns: JSX.Element
-        description: Single-component app with password state, copy-to-clipboard, and min/max character length sliders
+        description: Single-component app with password state, copy-to-clipboard, min/max character length sliders, and character requirement toggles
     imports:
       - from: ./wordListUtils
-        items: [getRandomWordsWithinLength]
+        items: [getRandomWordsWithinLength, applyRequirements]
 
-  ErrorBoundary.js:
-    description: React error boundary - catches render errors and shows fallback UI
+  ErrorBoundary.jsx:
+    description: React error boundary - catches render errors and shows fallback UI with refresh button
     exports:
       - name: ErrorBoundary
         kind: class
         returns: JSX.Element
-        description: Wraps children and catches errors during rendering, showing a refresh prompt on failure
+
+  crypto.js:
+    description: Shared cryptographic utility - secure random integer using crypto.getRandomValues with rejection sampling
+    exports:
+      - name: secureRandomInt
+        kind: function
+        params: [{name: max, type: number}]
+        returns: number
 
   wordListUtils.js:
-    description: Utilities for fetching random words from public/wordlist.txt (7772 EFF diceware words)
+    description: Utilities for fetching random words from public/wordlist.txt (7806 EFF diceware words + bonus comedy words)
     exports:
       - name: getRandomWord
         kind: function
@@ -47,15 +54,41 @@ files:
         description: Returns N unique random words using Fisher-Yates partial shuffle
       - name: getRandomWordsWithinLength
         kind: function
-        params: [{name: minLength, type: number, default: 16}, {name: maxLength, type: number, default: 32}, {name: maxAttempts, type: number, default: 100}]
+        params: [{name: minLength, type: number, default: 16}, {name: maxLength, type: number, default: 32}, {name: maxAttempts, type: number, default: 100}, {name: options, type: object}]
         returns: "Promise<{words: string[], password: string, success: boolean}>"
-        description: Generates a space-separated passphrase within character length constraints. Used by App.
+        description: Generates a space-separated passphrase within character length constraints. Tries humor engine first when funnyMode is true.
+      - name: applyRequirements
+        kind: function
+        params: [{name: password, type: string}, {name: requirements, type: object}]
+        returns: string
+        description: Appends capital letter, number, and/or special character based on toggle state
       - name: clearWordListCache
         kind: function
         params: []
         returns: void
         description: Clears the in-memory wordlist cache (used for testing)
 
+  humorEngine.js:
+    description: Incongruity-based funny passphrase generator - 600+ words across 11 categories with 29 cross-category templates
+    exports:
+      - name: generateFunnyPassphrase
+        kind: function
+        params: [{name: minLength, type: number}, {name: maxLength, type: number}, {name: maxAttempts, type: number, default: 200}]
+        returns: "{words: string[], password: string, success: boolean}"
+
   index.css:
-    description: Base font styles for body and code elements
-    exports: []
+    description: "Terminal" design system - CSS custom properties, reset, layout, component styles, animations, and prefers-reduced-motion support
+
+components:
+  PassphraseDisplay.jsx:
+    description: Hero panel showing generated passphrase with per-word staggered animation, character count, and range status
+  CopyButton.jsx:
+    description: Accent pill button with Copy/Copied states and 2-second auto-revert
+  RangeSlider.jsx:
+    description: Custom range input with accent fill track, label, and ARIA support
+  RequirementsToggles.jsx:
+    description: Three toggle switches for Capital letter, Number, and Special char requirements
+  GenerateButton.jsx:
+    description: Full-width accent button with CSS shimmer animation during loading state
+  NotificationBanner.jsx:
+    description: Inline alert banner with auto-dismiss for warnings and persistent display for errors

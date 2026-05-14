@@ -1,5 +1,3 @@
-import React from 'react';
-
 const RefreshIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <polyline points="23 4 23 10 17 10" />

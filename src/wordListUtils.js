@@ -1,26 +1,12 @@
 // Utility functions for working with the word list text file
 import { generateFunnyPassphrase } from './humorEngine';
+import { secureRandomInt } from './crypto';
 
 // In-memory cache for the wordlist to avoid repeated HTTP fetches
 let cachedWordList = null;
 let cachedWordStats = null;
 
 const SPECIAL_CHARS = '!@#$%&*?';
-
-const secureRandomInt = (max) => {
-  const array = new Uint32Array(1);
-  window.crypto.getRandomValues(array);
-  // Use modulo with rejection sampling to avoid bias
-  // For our wordlist sizes (< 10000), the bias from simple modulo on a 32-bit
-  // range is negligible (< 0.0001%), but we do it correctly anyway.
-  const limit = Math.floor(0xFFFFFFFF / max) * max;
-  let value = array[0];
-  while (value >= limit) {
-    window.crypto.getRandomValues(array);
-    value = array[0];
-  }
-  return value % max;
-};
 
 /**
  * Fetches and caches the wordlist. Deduplicates and normalises entries.

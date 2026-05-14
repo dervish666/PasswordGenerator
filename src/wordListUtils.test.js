@@ -17,9 +17,6 @@ const MOCK_WORDLIST = [
   'watermelon',                                     // 10 chars
 ].join('\n');
 
-const REAL_WORDLIST_URL = '/wordlist.txt';
-let realWordlistContent = null;
-
 /**
  * Mock fetch to return a wordlist string.
  */

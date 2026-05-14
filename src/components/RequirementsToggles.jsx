@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function RequirementsToggles({ requirements, onChange }) {
   const toggles = [
     { key: 'capital', label: 'Capital letter' },

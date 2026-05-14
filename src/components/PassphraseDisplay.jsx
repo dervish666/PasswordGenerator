@@ -1,5 +1,4 @@
-// src/components/PassphraseDisplay.js
-import React, { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import CopyButton from './CopyButton';
 
 export default function PassphraseDisplay({ password, minLength, maxLength, onCopy, animationKey }) {
@@ -7,7 +6,7 @@ export default function PassphraseDisplay({ password, minLength, maxLength, onCo
 
   useEffect(() => {
     if (!password) return;
-    setAnimate(false);
+    setAnimate(false); // eslint-disable-line react-hooks/set-state-in-effect -- intentional: reset+raf triggers CSS animation restart
     // Force a reflow so removing and re-adding the class triggers animation
     const frame = requestAnimationFrame(() => setAnimate(true));
     return () => cancelAnimationFrame(frame);
@@ -33,17 +32,17 @@ export default function PassphraseDisplay({ password, minLength, maxLength, onCo
   }
 
   return (
-    <div className="passphrase-panel">
+    <div id="passphrase-panel" className="passphrase-panel">
       <div data-testid="passphrase-display" aria-live="polite">
         {password ? (
           <div className="passphrase-text">
             {words.map((word, i) => (
-              <React.Fragment key={`${animationKey}-${i}`}>
+              <Fragment key={`${animationKey}-${i}`}>
                 {i > 0 && ' '}
                 <span className={animate ? 'passphrase-word' : ''}>
                   {word}
                 </span>
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
         ) : (

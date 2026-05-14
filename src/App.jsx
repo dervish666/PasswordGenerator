@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import PassphraseDisplay from './components/PassphraseDisplay';
 import RangeSlider from './components/RangeSlider';
 import RequirementsToggles from './components/RequirementsToggles';
@@ -29,7 +29,8 @@ function App() {
     setNotification({ message: '', severity: 'warning', autoDismissMs: 0 });
 
     try {
-      const result = await getRandomWordsWithinLength(minLength, maxLength, 100, { funnyMode: true });
+      const reqExtra = (requirements.number ? 1 : 0) + (requirements.special ? 1 : 0);
+      const result = await getRandomWordsWithinLength(minLength, maxLength - reqExtra, 100, { funnyMode: true });
 
       if (result.success) {
         setPassword(applyRequirements(result.password, requirements));
@@ -49,7 +50,7 @@ function App() {
           autoDismissMs: 0,
         });
       }
-    } catch (err) {
+    } catch (_err) {
       setNotification({
         message: 'Failed to generate password. Please try again.',
         severity: 'error',
@@ -75,13 +76,14 @@ function App() {
         document.execCommand('copy');
         document.body.removeChild(textArea);
       }
-    } catch (err) {
+    } catch (_err) {
       // Clipboard write failed — CopyButton will still show "Copied!" visually
     }
   }, [password]);
 
   return (
     <main className="app-container app-fade-in">
+      <a href="#passphrase-panel" className="skip-link">Skip to passphrase</a>
       <h1 className="app-title">Password Generator</h1>
       <p className="app-tagline">Secure diceware passphrases, generated locally.</p>
 

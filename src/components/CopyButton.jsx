@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 const CopyIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">

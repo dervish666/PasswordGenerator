@@ -1,5 +1,3 @@
-// src/components/PassphraseDisplay.test.js
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import PassphraseDisplay from './PassphraseDisplay';
 

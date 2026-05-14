@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.5.0] - 2026-05-14
+
+### Fixed
+- **nginx security headers on static assets** — `add_header` in the static assets `location` block was silently stripping CSP, X-Frame-Options, X-Content-Type-Options, and Referrer-Policy from JS/CSS/font responses
+- **Requirements length overflow** — enabling Number and/or Special char toggles no longer pushes the passphrase past the max length constraint
+- **Error notification styling** — error banners now display with a red left border, visually distinct from amber warnings
+
+### Added
+- **ESLint** — flat config with React Hooks plugin, `npm run lint` script, zero warnings
+- **Self-hosted fonts** — Inter and JetBrains Mono served from `public/fonts/` instead of Google Fonts CDN (eliminates IP leak to Google)
+- **Skip-to-content link** — hidden link for keyboard/screen-reader users
+- **Tests** — 15 new tests for `humorEngine.js`, `RequirementsToggles`, and `ErrorBoundary` (68 → 83 total)
+- **GitHub Actions CI** — lint, test, and build on push/PR to main
+- **Dependabot** — weekly npm dependency update checks
+- **Shared `crypto.js` module** — `secureRandomInt` extracted from duplicated implementations in `wordListUtils.js` and `humorEngine.js`
+
+### Changed
+- **Dockerfile** — uses `npm ci` instead of `npm install` for reproducible builds
+- **CSP tightened** — removed `fonts.googleapis.com` and `fonts.gstatic.com` allowances (no longer needed)
+- **Removed unnecessary React imports** — React 19 auto-JSX transform doesn't require them
+- **README.md rewritten** — updated from MUI/CRA-era docs to reflect current stack (Vite, custom CSS, humor engine, requirements toggles, Node 22)
+- **Structure YAML updated** — all file extensions, component listings, and descriptions now accurate
+
+### Removed
+- `project-plan.md` — archived to `docs/archive/` (stale v1.0 planning document)
+
 ## [2.4.0] - 2026-05-14
 
 ### Added

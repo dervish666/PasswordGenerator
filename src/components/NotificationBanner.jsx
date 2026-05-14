@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 const WarningIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
