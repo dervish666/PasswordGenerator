@@ -1,4 +1,5 @@
 // Utility functions for working with the word list text file
+import { generateFunnyPassphrase } from './humorEngine';
 
 // In-memory cache for the wordlist to avoid repeated HTTP fetches
 let cachedWordList = null;
@@ -113,7 +114,13 @@ export const getRandomWords = async (count = 3) => {
  * @param {number} maxAttempts - Maximum number of attempts before giving up
  * @returns {Promise<{words: string[], password: string, success: boolean}>} Result object
  */
-export const getRandomWordsWithinLength = async (minLength = 16, maxLength = 32, maxAttempts = 100) => {
+export const getRandomWordsWithinLength = async (minLength = 16, maxLength = 32, maxAttempts = 100, { funnyMode = false } = {}) => {
+  if (funnyMode) {
+    const result = generateFunnyPassphrase(minLength, maxLength, maxAttempts * 2);
+    if (result.success) return result;
+    // Fall through to normal generation if funny mode can't satisfy constraints
+  }
+
   if (minLength > maxLength) {
     return { words: [], password: '', success: false };
   }

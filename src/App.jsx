@@ -29,7 +29,7 @@ function App() {
     setNotification({ message: '', severity: 'warning', autoDismissMs: 0 });
 
     try {
-      const result = await getRandomWordsWithinLength(minLength, maxLength);
+      const result = await getRandomWordsWithinLength(minLength, maxLength, 100, { funnyMode: true });
 
       if (result.success) {
         setPassword(applyRequirements(result.password, requirements));

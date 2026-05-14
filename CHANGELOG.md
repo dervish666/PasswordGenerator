@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.4.0] - 2026-05-14
+
+### Added
+- **Humor engine** — passphrases now use incongruity-based word pairing for memorable, funny combinations. 600+ words tagged across 11 categories (animals, foods, grand adjectives, silly adjectives, body parts, dramatic actions, mundane actions, mundane objects, fancy objects, nature, sounds) with 29 templates that cross categories for maximum absurdity
+- **34 bonus words** added to the wordlist — comedy staples missing from the EFF list (noodle, turnip, llama, kazoo, spatula, hedgehog, etc.)
+
+### Changed
+- Passphrase generation now defaults to humor-aware word selection, falling back to fully random if length constraints can't be met with tagged words
+
 ## [2.3.0] - 2026-05-05
 
 ### Changed
