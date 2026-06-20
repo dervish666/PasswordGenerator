@@ -1,6 +1,6 @@
 {
   "name": "password-generator",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "A secure diceware passphrase generator with humor engine",
   "private": true,
   "type": "module",

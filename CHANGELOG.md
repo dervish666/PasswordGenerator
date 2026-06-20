@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.5.1] - 2026-06-20
+
+### Added
+- **SVG favicon** — self-contained vector favicon matching the dark theme, replacing `favicon.ico`/`logo192.png`
+
+### Changed
+- **Dependency updates** — `react`/`react-dom` 19.2.5 → 19.2.6, `vite` 8.0.10 → 8.0.16, `vitest` 4.1.5 → 4.1.7, `@vitejs/plugin-react` 6.0.1 → 6.0.2 (all via Dependabot)
+- **CI actions bumped to v5** — `actions/checkout` and `actions/setup-node` v4 → v5 (Node 24 runtime, clears the Node 20 deprecation warnings)
+- **Clipboard copy** — uses the Clipboard API directly; dropped the legacy `document.execCommand('copy')` fallback
+- **App.jsx handlers memoized** — `useCallback`/`useMemo` with functional `setState` updates
+
+### Fixed
+- **Min/max slider stale closure** — slider handlers now read the latest bound via functional `setState`, preventing a stale comparison
+- **Misplaced import in `humorEngine.js`** — `secureRandomInt` import hoisted to the top of the module
+- **Toggle "on" state** — renders a checkmark in the switch thumb when enabled
+
 ## [2.5.0] - 2026-05-14
 
 ### Fixed
