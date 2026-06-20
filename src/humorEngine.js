@@ -1,3 +1,5 @@
+import { secureRandomInt } from './crypto';
+
 const categories = {
   adjectives_grand: [
     'absolute', 'almighty', 'ancient', 'angelic', 'audacious', 'brilliant',
@@ -164,8 +166,6 @@ const templates = [
   ['actions_mundane', 'adjectives_grand', 'objects_fancy', 'sounds'],
   ['adjectives_grand', 'nature', 'adjectives_silly', 'animals'],
 ];
-
-import { secureRandomInt } from './crypto';
 
 const pickRandom = (arr) => arr[secureRandomInt(arr.length)];
 

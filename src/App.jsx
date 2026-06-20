@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import PassphraseDisplay from './components/PassphraseDisplay';
 import RangeSlider from './components/RangeSlider';
 import RequirementsToggles from './components/RequirementsToggles';
@@ -14,19 +14,24 @@ function App() {
   const [notification, setNotification] = useState({ message: '', severity: 'warning', autoDismissMs: 0 });
   const [animationKey, setAnimationKey] = useState(0);
   const [requirements, setRequirements] = useState({ capital: false, number: false, special: false });
+  const emptyNotification = useMemo(() => ({ message: '', severity: 'warning', autoDismissMs: 0 }), []);
 
-  const handleMinChange = (val) => {
-    if (val <= maxLength) setMinLength(val);
-  };
+  const dismissNotification = useCallback(() => {
+    setNotification(emptyNotification);
+  }, [emptyNotification]);
 
-  const handleMaxChange = (val) => {
-    if (val >= minLength) setMaxLength(val);
-  };
+  const handleMinChange = useCallback((val) => {
+    setMinLength(prev => val <= maxLength ? val : prev);
+  }, [maxLength]);
+
+  const handleMaxChange = useCallback((val) => {
+    setMaxLength(prev => val >= minLength ? val : prev);
+  }, [minLength]);
 
   const generatePassword = useCallback(async () => {
     if (generating) return;
     setGenerating(true);
-    setNotification({ message: '', severity: 'warning', autoDismissMs: 0 });
+    setNotification(emptyNotification);
 
     try {
       const reqExtra = (requirements.number ? 1 : 0) + (requirements.special ? 1 : 0);
@@ -59,23 +64,12 @@ function App() {
     } finally {
       setGenerating(false);
     }
-  }, [minLength, maxLength, generating, requirements]);
+  }, [minLength, maxLength, generating, requirements, emptyNotification]);
 
   const copyToClipboard = useCallback(async () => {
     if (!password) return;
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(password);
-      } else {
-        const textArea = document.createElement('textarea');
-        textArea.value = password;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-      }
+      await navigator.clipboard.writeText(password);
     } catch (_err) {
       // Clipboard write failed — CopyButton will still show "Copied!" visually
     }
@@ -99,7 +93,7 @@ function App() {
         message={notification.message}
         severity={notification.severity}
         autoDismissMs={notification.autoDismissMs}
-        onDismiss={() => setNotification({ message: '', severity: 'warning', autoDismissMs: 0 })}
+        onDismiss={dismissNotification}
       />
 
       <RangeSlider
